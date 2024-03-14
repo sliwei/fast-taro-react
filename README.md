@@ -19,7 +19,6 @@
 ## 推荐插件
 
 * sass
-* react-use
 * framer-motion
 * react-icons
 * react-redux & @reduxjs/toolkit
