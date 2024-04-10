@@ -59,7 +59,7 @@ export default defineConfig(async (merge, { command, mode }) => {
       imageUrlLoaderOption: {
         limit: 10,
         name: "assets/[name].[hash][ext]",
-        publicPath: isBuild ? CDN_URL : "",
+        publicPath: isBuild ? CDN_URL : "/",
       },
       webpackChain(chain) {
         chain.resolve.plugin("tsconfig-paths").use(TsconfigPathsPlugin);
