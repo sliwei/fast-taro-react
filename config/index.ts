@@ -1,8 +1,14 @@
 import { defineConfig, type UserConfigExport } from "@tarojs/cli";
 import TsconfigPathsPlugin from "tsconfig-paths-webpack-plugin";
 import { UnifiedWebpackPluginV5 } from "weapp-tailwindcss/webpack";
+import RemovePlugin from "remove-files-webpack-plugin";
+import WebpackAliyunOss from "webpack-aliyun-oss";
 import devConfig from "./dev";
 import prodConfig from "./prod";
+import pkg from "../package.json";
+
+const isBuild = process.env.NODE_ENV === "production";
+const CDN_URL = `https://cdn.xxx.com/fast-taro-react/${process.env.TARO_APP_ENV}/${pkg.version}/`;
 
 // https://taro-docs.jd.com/docs/next/config#defineconfig-辅助函数
 export default defineConfig(async (merge, { command, mode }) => {
@@ -38,7 +44,8 @@ export default defineConfig(async (merge, { command, mode }) => {
         url: {
           enable: true,
           config: {
-            limit: 1024, // 设定转换尺寸上限
+            limit: isBuild ? 5 : 1024, // 设定转换尺寸上限
+            basePath: isBuild ? CDN_URL : "",
           },
         },
         cssModules: {
@@ -48,6 +55,11 @@ export default defineConfig(async (merge, { command, mode }) => {
             generateScopedName: "[name]__[local]___[hash:base64:5]",
           },
         },
+      },
+      imageUrlLoaderOption: {
+        limit: 10,
+        name: "assets/[name].[hash][ext]",
+        publicPath: isBuild ? CDN_URL : "",
       },
       webpackChain(chain) {
         chain.resolve.plugin("tsconfig-paths").use(TsconfigPathsPlugin);
@@ -63,11 +75,29 @@ export default defineConfig(async (merge, { command, mode }) => {
             },
           },
         });
+        // 图片资源上传OSS,并删除本地assets资源,减少小程序体积
+        if (isBuild) {
+          chain.plugin("webpack-aliyun-oss").use(WebpackAliyunOss, [
+            {
+              from: ["./dist/assets/**"], //排除html文件
+              dist: `fast-taro-react/${process.env.TARO_APP_ENV}/${pkg.version}`,
+              region: process.env.CICD_region,
+              accessKeyId: process.env.CICD_accessKeyId,
+              accessKeySecret: process.env.CICD_accessKeySecret,
+              bucket: process.env.CICD_bucket,
+            },
+          ]);
+          chain
+            .plugin("remove-files-webpack-plugin")
+            .use(RemovePlugin, [
+              { after: { include: ["dist/assets"], trash: true } },
+            ]);
+        }
       },
     },
     h5: {
-      publicPath: "/",
-      staticDirectory: "static",
+      publicPath: isBuild ? CDN_URL : "/",
+      staticDirectory: "assets",
       output: {
         filename: "js/[name].[hash:8].js",
         chunkFilename: "js/[name].[chunkhash:8].js",
@@ -76,6 +106,10 @@ export default defineConfig(async (merge, { command, mode }) => {
         ignoreOrder: true,
         filename: "css/[name].[hash].css",
         chunkFilename: "css/[name].[chunkhash].css",
+      },
+      imageUrlLoaderOption: {
+        limit: 10,
+        name: "assets/[name].[hash][ext]",
       },
       postcss: {
         autoprefixer: {
@@ -92,6 +126,19 @@ export default defineConfig(async (merge, { command, mode }) => {
       },
       webpackChain(chain) {
         chain.resolve.plugin("tsconfig-paths").use(TsconfigPathsPlugin);
+        // 所有资源上传OSS
+        if (isBuild) {
+          chain.plugin("webpack-aliyun-oss").use(WebpackAliyunOss, [
+            {
+              from: ["./dist/**"], //排除html文件
+              dist: `fast-taro-react/${process.env.TARO_APP_ENV}/${pkg.version}`,
+              region: process.env.CICD_region,
+              accessKeyId: process.env.CICD_accessKeyId,
+              accessKeySecret: process.env.CICD_accessKeySecret,
+              bucket: process.env.CICD_bucket,
+            },
+          ]);
+        }
       },
     },
     rn: {
@@ -103,7 +150,7 @@ export default defineConfig(async (merge, { command, mode }) => {
       },
     },
   };
-  if (process.env.NODE_ENV === "development") {
+  if (!isBuild) {
     // 本地开发构建配置（不混淆压缩）
     return merge({}, baseConfig, devConfig);
   }

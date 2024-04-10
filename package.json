@@ -12,14 +12,15 @@
   "scripts": {
     "prepare": "husky install",
     "postinstall": "weapp-tw patch",
-    "dev": "npm run build:dev -- --watch",
-    "build:dev": "taro build --type weapp --mode dev",
+    "dev": "npm run build:test -- --watch",
     "build:test": "taro build --type weapp --mode test",
     "build:live": "taro build --type weapp --mode live",
+    "dev:h5": "npm run build:h5:test -- --watch",
+    "build:h5:test": "taro build --type h5 --mode test",
+    "build:h5:live": "taro build --type h5 --mode live",
     "build:swan": "taro build --type swan",
     "build:alipay": "taro build --type alipay",
     "build:tt": "taro build --type tt",
-    "build:h5": "taro build --type h5",
     "build:rn": "taro build --type rn",
     "build:qq": "taro build --type qq",
     "build:jd": "taro build --type jd",
@@ -28,7 +29,6 @@
     "dev:swan": "npm run build:swan -- --watch",
     "dev:alipay": "npm run build:alipay -- --watch",
     "dev:tt": "npm run build:tt -- --watch",
-    "dev:h5": "npm run build:h5 -- --watch",
     "dev:rn": "npm run build:rn -- --watch",
     "dev:qq": "npm run build:qq -- --watch",
     "dev:jd": "npm run build:jd -- --watch",
@@ -95,13 +95,15 @@
     "postcss": "^8.4.35",
     "postcss-rem-to-responsive-pixel": "^6.0.1",
     "react-refresh": "^0.11.0",
+    "remove-files-webpack-plugin": "^1.5.0",
     "stylelint": "^14.4.0",
     "tailwindcss": "^3.4.1",
     "ts-node": "^10.9.1",
     "tsconfig-paths-webpack-plugin": "^4.1.0",
     "typescript": "^5.1.0",
     "weapp-tailwindcss": "^3.0.11",
-    "webpack": "5.78.0"
+    "webpack": "5.78.0",
+    "webpack-aliyun-oss": "^0.3.13"
   },
   "engines": {
     "node": ">=18.0.0"
