@@ -1,6 +1,10 @@
-# Taro@3 react模板
+# Taro@3 react模板,兼容H5
 
-特色: 更新/网络检测/手机号授权/各种授权函数/分享/自定义Navbar/完善的用户权限流程/权限组件与函数/tailwindcss/react-use/jotai/丰富utils
+特色: 小程序和H5/更新/网络检测/手机号授权/各种授权函数/分享/自定义Navbar/完善的用户权限流程/权限组件与函数/tailwindcss/react-use/jotai/丰富utils
+
+小程序图片资源打包自动上传oss，减少包体积，小程序直接调用接口
+
+H5打包自动上传所有资源到oss，部署html即可，可以配置devServer代理接口
 
 ## 已集成插件
 
@@ -15,6 +19,7 @@
 * commitlint
 * husky
 * jotai
+* webpack-aliyun-oss
 
 ## 推荐插件
 
@@ -26,20 +31,22 @@
 
 ## 开发
 ```
-yarn dev:weapp
->>>
-npm run build:weapp -- --watch --mode dev
+# 小程序
+yarn dev
+
+# H5
+yarn dev:h5
 ```
 
 ## 打包
 ```
+# 小程序
 yarn build:test
->>>
-taro build --type weapp --mode test
-
 yarn build:live
->>>
-taro build --type weapp --mode live
+
+# H5
+yarn build:h5:test
+yarn build:h5:live
 ```
 
 ## 流程
@@ -72,3 +79,10 @@ api/role/findAuthority
 2.检查更新
 
 3.网络检测提示
+
+## 开发注意事项
+1.尽量使用html div标签布局，避免H1、H2等标签的使用，应为项目未集成标签基础样式
+2.所有展示类标签都需要宽高，比如img，否则两端渲染不一致
+3.对于小程序、H5关于用户信息的逻辑需特殊处理，可使用process.env.TARO_ENV === "h5"判断
+4.关于h5使用tab-bar，可在一级页面导入custom-tab-bar使用
+5.关于路由守卫，taro并没有好的方式，可以在离开页面时、进入页面的Effect或Effect route来处理
