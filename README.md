@@ -82,7 +82,11 @@ api/role/findAuthority
 
 ## 开发注意事项
 1.尽量使用html div标签布局，避免H1、H2等标签的使用，应为项目未集成标签基础样式
+
 2.所有展示类标签都需要宽高，比如img，否则两端渲染不一致
+
 3.对于小程序、H5关于用户信息的逻辑需特殊处理，可使用process.env.TARO_ENV === "h5"判断
+
 4.关于h5使用tab-bar，可在一级页面导入custom-tab-bar使用
+
 5.关于路由守卫，taro并没有好的方式，可以在离开页面时、进入页面的Effect或Effect route来处理
